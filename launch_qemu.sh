@@ -5,14 +5,51 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 ARTIFACTS_DIR=${ARTIFACTS_DIR:-$SCRIPT_DIR/artifacts}
 
-SDK_DEFAULT="$HOME/Library/Android/sdk/system-images/android-33/default/arm64-v8a"
+case "$(uname -s)" in
+  Darwin)
+    SDK_ROOT_DEFAULT="$HOME/Library/Android/sdk"
+    ;;
+  Linux)
+    SDK_ROOT_DEFAULT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Android/Sdk}}"
+    if [ ! -f "$SDK_ROOT_DEFAULT/system-images/android-33/default/arm64-v8a/kernel-ranchu" ] &&
+       [ -f /mnt/d/YuKongA/AndroidSDK/system-images/android-33/default/arm64-v8a/kernel-ranchu ]; then
+      SDK_ROOT_DEFAULT="/mnt/d/YuKongA/AndroidSDK"
+    fi
+    ;;
+  *)
+    SDK_ROOT_DEFAULT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Android/Sdk}}"
+    ;;
+esac
+SDK_DEFAULT="$SDK_ROOT_DEFAULT/system-images/android-33/default/arm64-v8a"
 SDK_DIR=${SDK_DIR:-$SDK_DEFAULT}
 KERNEL=${KERNEL:-$SDK_DIR/kernel-ranchu}
 LOG=${LOG:-$ARTIFACTS_DIR/qemu_boot.log}
 
+# Keep the host window, virtio-gpu scanout and Linux DRM mode in sync.  The
+# virtio-gpu device defaults vary between QEMU builds, so do not rely on them.
+WIDTH=${WIDTH:-1080}
+HEIGHT=${HEIGHT:-1920}
+REFRESH=${REFRESH:-60}
+
 HOST_ARCH=$(uname -m)
+HOST_OS=$(uname -s)
 CPU_MODEL=${CPU_MODEL:-}
 QEMU_ACCEL=${QEMU_ACCEL:-}
+DISPLAY_BACKEND=${DISPLAY_BACKEND:-}
+
+if [ -z "$DISPLAY_BACKEND" ]; then
+  if [ "$HOST_OS" = "Darwin" ]; then
+    DISPLAY_BACKEND=cocoa
+  else
+    DISPLAY_BACKEND=gtk
+  fi
+fi
+
+if [ "$DISPLAY_BACKEND" = "gtk" ]; then
+  DISPLAY_OPTIONS="gtk,full-screen=off,show-menubar=off,show-cursor=on,zoom-to-fit=on"
+else
+  DISPLAY_OPTIONS="$DISPLAY_BACKEND,show-cursor=on"
+fi
 
 if ! command -v qemu-system-aarch64 >/dev/null 2>&1; then
   echo "qemu-system-aarch64 不在 PATH 中" >&2
@@ -56,7 +93,7 @@ else
   fi
 fi
 
-EXTRA_APPEND="skip_initramfs"
+EXTRA_APPEND="skip_initramfs video=Virtual-1:${WIDTH}x${HEIGHT}@${REFRESH}"
 EXTRA_DRIVES=()
 echo "=== 启动 TWRP recovery ==="
 
@@ -82,9 +119,8 @@ nohup qemu-system-aarch64 \
   -kernel "$KERNEL" \
   -initrd "$RAMDISK" \
   -append "console=ttyAMA0 androidboot.hardware=ranchu androidboot.selinux=permissive androidboot.serialno=QEMU0001 $EXTRA_APPEND" \
-  ${EXTRA_DRIVES+"${EXTRA_DRIVES[@]}"} \
-  -device virtio-gpu-pci,edid=on,xres=1280,yres=720 \
-  -display cocoa,show-cursor=on \
+  -device "virtio-gpu-pci,edid=on,xres=${WIDTH},yres=${HEIGHT}" \
+  -display "$DISPLAY_OPTIONS" \
   -device usb-ehci \
   -device usb-tablet \
   -device virtio-net-pci,netdev=net0 \

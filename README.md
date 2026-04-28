@@ -117,11 +117,14 @@ brew install qemu
 
 ### Android SDK 路径
 
-默认脚本使用：
+macOS 默认使用：
 
 ```text
 $HOME/Library/Android/sdk/system-images/android-33/default/arm64-v8a
 ```
+
+Linux 默认使用 `$HOME/Android/Sdk`；WSL 检测不到该目录时会回退到
+`/mnt/d/YuKongA/AndroidSDK`。也可以用 `SDK_DIR` 覆盖路径。
 
 其中必须存在：
 
@@ -186,17 +189,17 @@ bash launch_qemu.sh
 当前脚本固定使用：
 
 1. `-machine virt`
-2. 优先 `-accel hvf`，否则回退 `tcg`
-3. `-device virtio-gpu-pci,edid=on,xres=1280,yres=720`
+2. macOS 优先 `-accel hvf`，Linux 回退 `tcg`
+3. `-device virtio-gpu-pci,edid=on,xres=1080,yres=1920`
 4. `-device virtio-net-pci`
-5. `hostfwd=tcp::5556-:5555`
-6. `-display cocoa,show-cursor=on`
+5. `hostfwd=tcp::5557-:5555`
+6. macOS 使用 `-display cocoa,show-cursor=on`；Linux 使用 GTK 缩放窗口
 
 也就是说，宿主机上 ADB 应连接：
 
 ```bash
-adb connect 127.0.0.1:5556
-adb -s 127.0.0.1:5556 get-state
+adb connect 127.0.0.1:5557
+adb -s 127.0.0.1:5557 get-state
 ```
 
 ## 串口调试

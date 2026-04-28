@@ -278,7 +278,7 @@ virtio-gpu.ko
 修正方式是给 QEMU 增加：
 
 ```text
--device virtio-gpu-pci,edid=on,xres=720,yres=1280
+-device virtio-gpu-pci,edid=on,xres=1080,yres=1920
 ```
 
 这一步解决的是 `connector disconnected`。
@@ -364,7 +364,8 @@ e->p.synced = 0x03;
 处理方式：
 
 1. 临时按 `Ctrl+Alt+G` 释放鼠标
-2. 长期把显示参数改成 `-display cocoa,show-cursor=on`
+2. macOS 使用 `-display cocoa,show-cursor=on`；Linux 使用
+   `-display gtk,full-screen=off,show-menubar=off,show-cursor=on,zoom-to-fit=on`
 
 ### 本问题结论
 

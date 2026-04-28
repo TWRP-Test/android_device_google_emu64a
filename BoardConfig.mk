@@ -49,7 +49,6 @@ RECOVERY_BINARY_SOURCE_FILES    += $(TARGET_OUT_EXECUTABLES)/strace
 # File systems
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
-TW_USE_DMCTL               := true
 
 # Kernel
 BOARD_KERNEL_IMAGE_NAME     := Image
@@ -77,11 +76,12 @@ TW_INCLUDE_FASTBOOTD                        := false
 
 # Tool
 TW_ENABLE_ALL_PARTITION_TOOLS := true
-TW_INCLUDE_7ZA                := true
 TW_INCLUDE_REPACKTOOLS        := true
 TW_INCLUDE_RESETPROP          := true
 TW_USE_TOOLBOX                := true
 TW_INCLUDE_ZSTD               := true
+TW_INCLUDE_7ZA                := true
+TW_USE_DMCTL                  := true
 
 # TWRP display
 TW_THEME                    := portrait_hdpi
