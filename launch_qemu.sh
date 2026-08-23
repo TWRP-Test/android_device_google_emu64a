@@ -46,9 +46,9 @@ if [ -z "$DISPLAY_BACKEND" ]; then
 fi
 
 if [ "$DISPLAY_BACKEND" = "gtk" ]; then
-  DISPLAY_OPTIONS="gtk,full-screen=off,show-menubar=off,show-cursor=on,zoom-to-fit=on"
+  DISPLAY_OPTIONS="gtk,full-screen=off,show-menubar=off,show-cursor=off,zoom-to-fit=on"
 else
-  DISPLAY_OPTIONS="$DISPLAY_BACKEND,show-cursor=on"
+  DISPLAY_OPTIONS="$DISPLAY_BACKEND,show-cursor=off"
 fi
 
 if ! command -v qemu-system-aarch64 >/dev/null 2>&1; then
@@ -122,7 +122,7 @@ nohup qemu-system-aarch64 \
   -device "virtio-gpu-pci,edid=on,xres=${WIDTH},yres=${HEIGHT}" \
   -display "$DISPLAY_OPTIONS" \
   -device usb-ehci \
-  -device usb-tablet \
+  -device usb-mouse \
   -device virtio-net-pci,netdev=net0 \
   -netdev "user,id=net0,hostfwd=tcp::5557-:5555" \
   -serial "file:$LOG" \

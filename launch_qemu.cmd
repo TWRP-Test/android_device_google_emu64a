@@ -41,10 +41,10 @@ if exist "%~dp0fit_qemu_window.ps1" (
     -append "console=ttyAMA0 androidboot.hardware=ranchu androidboot.selinux=permissive androidboot.serialno=QEMU0001 skip_initramfs video=Virtual-1:%WIDTH%x%HEIGHT%@%REFRESH%" ^
     -device virtio-gpu-pci,edid=on,xres=%WIDTH%,yres=%HEIGHT% ^
     -device usb-ehci ^
-    -device usb-tablet ^
+    -device usb-mouse ^
     -device virtio-net-pci,netdev=net0 ^
     -netdev user,id=net0,hostfwd=tcp::5557-:5555 ^
-    -display gtk,full-screen=off,show-menubar=off,show-cursor=on,zoom-to-fit=on ^
+    -display gtk,full-screen=off,show-menubar=off,show-cursor=off,zoom-to-fit=on ^
     -serial file:"%LOG%" ^
     -no-reboot
 

@@ -794,3 +794,17 @@ recovery/root/lib/modules/*.ko
 | 颜色问题 | 依赖重新编译后的像素格式修正 |
 | 输入问题 | 已修复 |
 | ADB 连接 | 已修复 |
+
+### 11.5 当前输入与显示基线（2026-08-24）
+
+为保持 DPI 和 TWRP 默认显示行为，不在 recovery 源码中保留额外的 QEMU 专用输入或帧率宏。
+WSL 中此前用于复刻问题 06 的 `twrpminui/events.cpp` 实验改动已回退到上游状态。
+
+Windows 启动脚本保留当前实测可用的输入组合：
+
+```text
+-device usb-mouse
+-display gtk,full-screen=off,show-menubar=off,show-cursor=off,zoom-to-fit=on
+```
+
+该组合使用 QEMU 传统相对鼠标，并关闭 QEMU 自带光标，由 TWRP 绘制主题光标。DRM 输出仍为 `1080x1920@60`；TWRP recovery 不继承主系统的 LCD density，当前 `portrait_hdpi` 主题和默认 recovery density 保持不变。
