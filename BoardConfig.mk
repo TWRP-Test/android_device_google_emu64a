@@ -99,6 +99,9 @@ TW_CUSTOM_BATTERY_PATH      := /sys/class/power_supply/battery
 # Emulator uses virtio-gpu (drm), not fbdev
 TW_USE_NEW_MINADBD          := true
 
+# Disable vibrator
+TW_NO_HAPTICS               := true
+
 # TWRP file system
 RECOVERY_SDCARD_ON_DATA     := true
 TARGET_USES_MKE2FS          := true
