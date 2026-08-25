@@ -169,7 +169,9 @@ bash launch_qemu.sh twrp
 2. 当前目录或 `artifacts` 目录下的 `ramdisk-recovery.cpio`
 3. 当前目录下 `artifacts` 里的 `qemu_userdata.img`
 
-如果 `qemu_userdata.img` 不存在，脚本会自动创建一个 8G 的 raw 数据盘。
+如果 `qemu_userdata.img` 不存在，脚本会自动创建一个 512M 的稀疏 raw 数据盘。
+Android 33 的 `kernel-ranchu` 不含 `virtio-blk`，因此启动器通过 USB storage 将其
+暴露为 `/dev/block/sda`；首次启动会自动格式化为 ext4。
 
 在 Apple Silicon macOS 上，当前脚本会优先使用 `hvf` 硬件加速；只有不可用时才回退到 `tcg`。如果落到 `tcg`，TWRP 的整体响应会明显变慢。
 

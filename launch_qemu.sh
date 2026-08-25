@@ -24,6 +24,7 @@ SDK_DEFAULT="$SDK_ROOT_DEFAULT/system-images/android-33/default/arm64-v8a"
 SDK_DIR=${SDK_DIR:-$SDK_DEFAULT}
 KERNEL=${KERNEL:-$SDK_DIR/kernel-ranchu}
 LOG=${LOG:-$ARTIFACTS_DIR/qemu_boot.log}
+DATA_IMG=${DATA_IMG:-$ARTIFACTS_DIR/qemu_userdata.img}
 
 # Keep the host window, virtio-gpu scanout and Linux DRM mode in sync.  The
 # virtio-gpu device defaults vary between QEMU builds, so do not rely on them.
@@ -53,6 +54,11 @@ fi
 
 if ! command -v qemu-system-aarch64 >/dev/null 2>&1; then
   echo "qemu-system-aarch64 不在 PATH 中" >&2
+  exit 1
+fi
+
+if ! command -v qemu-img >/dev/null 2>&1; then
+  echo "qemu-img 不在 PATH 中" >&2
   exit 1
 fi
 
@@ -94,7 +100,6 @@ else
 fi
 
 EXTRA_APPEND="skip_initramfs video=Virtual-1:${WIDTH}x${HEIGHT}@${REFRESH}"
-EXTRA_DRIVES=()
 echo "=== 启动 TWRP recovery ==="
 
 if [ ! -f "$KERNEL" ]; then
@@ -108,6 +113,11 @@ if [ ! -f "$RAMDISK" ]; then
   exit 1
 fi
 
+if [ ! -f "$DATA_IMG" ]; then
+  echo "创建 512M userdata: $DATA_IMG"
+  qemu-img create -f raw "$DATA_IMG" 512M
+fi
+
 : > "$LOG"
 
 nohup qemu-system-aarch64 \
@@ -118,10 +128,12 @@ nohup qemu-system-aarch64 \
   -m 3072 \
   -kernel "$KERNEL" \
   -initrd "$RAMDISK" \
+  -drive "file=$DATA_IMG,if=none,format=raw,id=userdata" \
   -append "console=ttyAMA0 androidboot.hardware=ranchu androidboot.selinux=permissive androidboot.serialno=QEMU0001 $EXTRA_APPEND" \
   -device "virtio-gpu-pci,edid=on,xres=${WIDTH},yres=${HEIGHT}" \
   -display "$DISPLAY_OPTIONS" \
   -device usb-ehci \
+  -device usb-storage,drive=userdata \
   -device usb-mouse \
   -device virtio-net-pci,netdev=net0 \
   -netdev "user,id=net0,hostfwd=tcp::5557-:5555" \

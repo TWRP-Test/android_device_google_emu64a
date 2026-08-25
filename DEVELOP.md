@@ -791,6 +791,7 @@ recovery/root/lib/modules/*.ko
 | virtio-gpu 模块加载 | 已验证 |
 | `/dev/dri/card0` 出现 | 已验证 |
 | QEMU 下 TWRP UI | 已验证 |
+| `/data` 持久化存储 | USB storage `/dev/block/sda`，已验证首次格式化与复启保留 |
 | 颜色问题 | 依赖重新编译后的像素格式修正 |
 | 输入问题 | 已修复 |
 | ADB 连接 | 已修复 |
@@ -807,4 +808,4 @@ Windows 启动脚本保留当前实测可用的输入组合：
 -display gtk,full-screen=off,show-menubar=off,show-cursor=off,zoom-to-fit=on
 ```
 
-该组合使用 QEMU 传统相对鼠标，并关闭 QEMU 自带光标，由 TWRP 绘制主题光标。DRM 输出仍为 `1080x1920@60`；TWRP recovery 不继承主系统的 LCD density，当前 `portrait_hdpi` 主题和默认 recovery density 保持不变。
+该组合使用 QEMU 传统相对鼠标，并关闭 QEMU 自带光标，由 TWRP 绘制主题光标。DRM 输出与 emu64a GUI 均为 60 FPS；TWRP recovery 不继承主系统的 LCD density，当前 `portrait_hdpi` 主题和默认 recovery density 保持不变。

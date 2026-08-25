@@ -81,7 +81,7 @@ set LOG=%ARTIFACTS%\qemu_boot.log
 set DATA_IMG=%ARTIFACTS%\qemu_userdata.img
 
 if not exist "%ARTIFACTS%" mkdir "%ARTIFACTS%"
-if not exist "%DATA_IMG%" "%QEMU_DIR%\qemu-img.exe" create -f raw "%DATA_IMG%" 8G
+if not exist "%DATA_IMG%" "%QEMU_DIR%\qemu-img.exe" create -f raw "%DATA_IMG%" 512M
 
 "%QEMU%" ^
     -machine virt ^
@@ -91,13 +91,15 @@ if not exist "%DATA_IMG%" "%QEMU_DIR%\qemu-img.exe" create -f raw "%DATA_IMG%" 8
     -m 3072 ^
     -kernel "%KERNEL%" ^
     -initrd "%RAMDISK%" ^
+    -drive file="%DATA_IMG%",if=none,format=raw,id=userdata ^
     -append "console=ttyAMA0 androidboot.hardware=ranchu androidboot.selinux=permissive androidboot.serialno=QEMU0001 skip_initramfs video=Virtual-1:1080x1920@60" ^
     -device virtio-gpu-pci,edid=on,xres=1080,yres=1920 ^
     -device usb-ehci ^
-    -device usb-tablet ^
+    -device usb-storage,drive=userdata ^
+    -device usb-mouse ^
     -device virtio-net-pci,netdev=net0 ^
     -netdev user,id=net0,hostfwd=tcp::5557-:5555 ^
-    -display gtk,full-screen=off,show-menubar=off,show-cursor=on,zoom-to-fit=on ^
+    -display gtk,full-screen=off,show-menubar=off,show-cursor=off,zoom-to-fit=on ^
     -serial file:"%LOG%" ^
     -no-reboot
 ```

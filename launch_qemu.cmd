@@ -6,21 +6,29 @@ set "SCRIPT_DIR=%~dp0"
 set "QEMU_DIR=%SCRIPT_DIR%qemu-w64"
 if not exist "%QEMU_DIR%\qemu-system-aarch64.exe" set "QEMU_DIR=D:\YuKongA\qemu\qemu-w64"
 set "QEMU=%QEMU_DIR%\qemu-system-aarch64.exe"
+set "QEMU_IMG=%QEMU_DIR%\qemu-img.exe"
 set "SDK_ARM64=D:\YuKongA\AndroidSDK\system-images\android-33\default\arm64-v8a"
 set "KERNEL=%SDK_ARM64%\kernel-ranchu"
 set "RAMDISK=%SCRIPT_DIR%artifacts\ramdisk-recovery.cpio"
 if not exist "%RAMDISK%" set "RAMDISK=D:\GitHub\android_device_google_emu64a\artifacts\ramdisk-recovery.cpio"
 set "ARTIFACTS=%SCRIPT_DIR%artifacts"
 set "LOG=%ARTIFACTS%\qemu_boot.log"
+set "DATA_IMG=%ARTIFACTS%\qemu_userdata.img"
 set "ADB=D:\YuKongA\AndroidSDK\platform-tools\adb.exe"
 set "WIDTH=1080"
 set "HEIGHT=1920"
 set "REFRESH=60"
 
 if not exist "%QEMU%" goto missing
+if not exist "%QEMU_IMG%" goto missing
 if not exist "%KERNEL%" goto missing
 if not exist "%RAMDISK%" goto missing
 if not exist "%ARTIFACTS%" mkdir "%ARTIFACTS%"
+if not exist "%DATA_IMG%" (
+    echo Creating 512M userdata image...
+    "%QEMU_IMG%" create -f raw "%DATA_IMG%" 512M
+    if errorlevel 1 exit /b 1
+)
 
 echo Starting TWRP emu64a...
 echo QEMU log: %LOG%
@@ -38,9 +46,11 @@ if exist "%~dp0fit_qemu_window.ps1" (
     -m 3072 ^
     -kernel "%KERNEL%" ^
     -initrd "%RAMDISK%" ^
+    -drive file="%DATA_IMG%",if=none,format=raw,id=userdata ^
     -append "console=ttyAMA0 androidboot.hardware=ranchu androidboot.selinux=permissive androidboot.serialno=QEMU0001 skip_initramfs video=Virtual-1:%WIDTH%x%HEIGHT%@%REFRESH%" ^
     -device virtio-gpu-pci,edid=on,xres=%WIDTH%,yres=%HEIGHT% ^
     -device usb-ehci ^
+    -device usb-storage,drive=userdata ^
     -device usb-mouse ^
     -device virtio-net-pci,netdev=net0 ^
     -netdev user,id=net0,hostfwd=tcp::5557-:5555 ^
@@ -58,6 +68,7 @@ exit /b %EXIT_CODE%
 :missing
 echo Missing required file.
 echo QEMU:    %QEMU%
+echo QEMU img: %QEMU_IMG%
 echo Kernel:  %KERNEL%
 echo Ramdisk: %RAMDISK%
 pause
